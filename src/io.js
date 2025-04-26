@@ -63,18 +63,33 @@ export async function getAllBookmarks() {
 }
 
 
-export async function saveProcessedToFile(processed) {
-  const blob = new Blob([JSON.stringify(processed, null, 2)], { type: "application/json" });
+export async function saveProcessedInChunks(processed) {
+  const chunkSize = 200;
+  const totalChunks = Math.ceil(processed.length / chunkSize);
 
-  // Create a link and simulate click to download
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = "processed_bookmarks.json"; // You can change this to .txt if desired
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
+  for (let i = 0; i < totalChunks; i++) {
+    const chunk = processed.slice(i * chunkSize, (i + 1) * chunkSize);
+    const jsonString = JSON.stringify(chunk, null, 2);
+    const blob = new Blob([jsonString], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+
+    a.style.display = "none";
+    a.href = url;
+    a.download = `processed_bookmarks_part${i + 1}.json`;
+
+    document.body.appendChild(a);
+
+    // Allow browser to process before triggering download
+    await new Promise((resolve) => {
+      requestAnimationFrame(() => {
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        resolve();
+      });
+    });
+  }
 }
 
 export async function loadProcessedFromFile(filePath) {
