@@ -70,7 +70,7 @@ function updateProgress(processed, total) {
     const percent = total > 0 ? (processed / total) * 100 : 0;
     progressBar.style.width = `${percent}%`;
 
-    let remainingText = "";
+    let remainingText = " (unknown time left)";
 
     if (startTime && processed > 0) {
       const elapsedMs = Date.now() - startTime;
