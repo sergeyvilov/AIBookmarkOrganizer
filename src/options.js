@@ -130,9 +130,9 @@ async function getSummary(url, fallbackSummary) {
     throw new Error(response.status)
   }
   const result = await response.json();
-  const output = result.choices?.[0]?.message?.content.trim() || "";
-  console.log("GPT output:", output);
-  if (output === 'error') {
+  const summary = result.choices?.[0]?.message?.content.trim() || "";
+  console.log("GPT output:", summary);
+  if (summary === 'error') {
     return fallbackSummary
   }
   return summary
@@ -257,7 +257,7 @@ async function organizeBookmarks(organizedFolder) {
 
   let bookmarks = await io.getAllBookmarks();
 
-  bookmarks = bookmarks.slice(0, 10);
+  //bookmarks = bookmarks.slice(0, 10);
 
   console.log(`[organizeBookmarks] Total bookmarks found: ${bookmarks.length}`);
 
@@ -270,7 +270,7 @@ async function organizeBookmarks(organizedFolder) {
 
     try {
       const summary = await getSummary(bm.url, bm.title);
-      if (!result) {
+      if (!summary) {
         console.log(`[organizeBookmarks] Unreachable: ${bm.url}`);
         unreachableBookmarks.push(bm);
         continue;
@@ -376,6 +376,16 @@ organizeBtn.addEventListener("click", async () => {
   }
 });
 
+document.addEventListener("DOMContentLoaded", async () => {
+  await loadOptions();
+
+  [apiKeyInput, gptModelInput, embedModelInput].forEach(input => {
+    input.addEventListener('input', () => {
+      saveOptions();
+    });
+  });
+
+});
 
 function showToast(message, type = 'success') {
   const toast = document.getElementById('toast');
@@ -390,7 +400,6 @@ function showToast(message, type = 'success') {
 
   document.addEventListener('click', hideToast);
 }
-
 
 
 window.addEventListener('beforeunload', (event) => {
