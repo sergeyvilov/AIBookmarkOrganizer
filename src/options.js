@@ -232,7 +232,7 @@ async function organizeBookmarks(organizedFolder) {
 
   let bookmarks = await io.getAllBookmarks();
 
-  //bookmarks = bookmarks.slice(0, 10);
+  bookmarks = bookmarks.slice(0, 10);
 
   console.log(`[organizeBookmarks] Total bookmarks found: ${bookmarks.length}`);
 
@@ -311,9 +311,12 @@ async function organizeBookmarks(organizedFolder) {
 // Handle organize bookmarks button
 organizeBtn.addEventListener("click", async () => {
   if (isOrganizing) {
-    cancelRequested = true;
-    organizeBtn.disabled = true;
-    organizeBtn.textContent = "Cancelling...";
+    const userConfirmed = confirm('Do you want to interrupt bookmark organization?');
+    if (userConfirmed) {
+      cancelRequested = true;
+      organizeBtn.disabled = true;
+      organizeBtn.textContent = "Cancelling...";
+    }
   } else {
     console.log("Organize button clicked");
     const organizedFolder = await io.getOrganizedFolder()
