@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "AI Bookmark Organizer",
   "version": "1.0.0",
-  "description": "LLM-powered clustering to keep your bookmarks effortlessly organized.",
+  "description": "Organize your chaotic bookmarks with the power of AI.",
   "permissions": [
     "bookmarks",
     "storage",
