@@ -4,16 +4,18 @@ import * as cluster from './clustering.js';
 const apiKeyInput = document.getElementById("api-key");
 const gptModelInput = document.getElementById("gpt-model");
 const embedModelInput = document.getElementById("embed-model");
-const systemPromptInput = document.getElementById("system-prompt");
 const organizeBtn = document.getElementById("organize-btn");
 const progressBar = document.getElementById("progress-bar");
 const progressText = document.getElementById("progress-text");
 const progressRow = document.getElementById("progress-row");
+const toggle = document.getElementById('toggle-advanced');
+const advancedDiv = document.getElementById('advanced-settings');
+
 
 function getSettings() {
   return new Promise((resolve) => {
     chrome.storage.local.get(
-      ['openAI_api_key', 'gpt_model', 'embed_model', 'gpt_system_prompt'],
+      ['openAI_api_key', 'gpt_model', 'embed_model'],
       (result) => {
         resolve(result);
       }
@@ -27,7 +29,6 @@ async function loadOptions() {
   apiKeyInput.value = options.openAI_api_key || "";
   gptModelInput.value = options.gpt_model || "";
   embedModelInput.value = options.embed_model || "";
-  systemPromptInput.value = options.gpt_system_prompt || "";
 }
 
 // Save options
@@ -36,7 +37,6 @@ async function saveOptions() {
     openAI_api_key: apiKeyInput.value,
     gpt_model: gptModelInput.value,
     embed_model: embedModelInput.value,
-    gpt_system_prompt: systemPromptInput.value
   });
 }
 
@@ -85,8 +85,7 @@ function updateProgress(processed, total) {
   }
 }
 
-// Helper: Get summary and title from OpenAI
-async function getSummaryAndTitle(url, fallbackTitle) {
+async function getSummary(url, fallbackSummary) {
 
   try {
     if (!(await fetch(url, { method: 'HEAD' })).ok) return null; // Unreachable
@@ -102,7 +101,7 @@ async function getSummaryAndTitle(url, fallbackTitle) {
 
   if (hasExtension && extension !== 'html') {
     console.log(`[getSummaryAndTitle] URL ${url} has extension .${extension}, skipping fetch and using fallback.`);
-    return { summary: fallbackTitle, title: fallbackTitle };
+    return fallbackSummary;
   }
 
   const response = await fetch("https://api.openai.com/v1/chat/completions", {
@@ -116,11 +115,11 @@ async function getSummaryAndTitle(url, fallbackTitle) {
       messages: [
         {
           role: "system",
-          content: gpt_system_prompt
+          content: "You are a helpful assistant that summarizes webpages for bookmark organization. You provide a single-paragraph summary (~500 words) of a given webpage. Do not mention hosting platforms (e.g., YouTube, Medium, StackOverflow) in the summary or title. Do not use Markdown, HTML, or emojis in the summary or title. The last sentence should also mention areas of aplication of the information on the page. Output 'error' if you can not generate the summary"
         },
         {
           role: "user",
-          content: `Please generate a summary and a title for the following webpage:\n\nURL: ${url}\n\nFormat your output as:\nsummary: <your_summary>\ntitle: <your_title>`
+          content: `Please generate a summary for the following webpage:\n\nURL: ${url}`
         }
       ],
       temperature: 0.7
@@ -131,15 +130,12 @@ async function getSummaryAndTitle(url, fallbackTitle) {
     throw new Error(response.status)
   }
   const result = await response.json();
-  const output = result.choices?.[0]?.message?.content || "";
+  const output = result.choices?.[0]?.message?.content.trim() || "";
   console.log("GPT output:", output);
-  const summary = output.match(/summary:\s*(.+)/i)?.[1]?.trim();
-  const title = output.match(/title:\s*(.+)/i)?.[1]?.trim();
-  if (!summary || !title) {
-    console.warn(`[getSummaryAndTitle] Incomplete GPT output, falling back to bookmark title: ${fallbackTitle}`);
-    return { summary: fallbackTitle, title: fallbackTitle };
+  if (output === 'error') {
+    return fallbackSummary
   }
-  return { summary, title };
+  return summary
 }
 
 // Get OpenAI embeddings
@@ -241,7 +237,7 @@ async function addUnreachableBookmarks(bookmarks,organizedFolder) {
   console.log(`[addUnreachableBookmarks] Added ${bookmarks.length} unreachable bookmarks.`);
 }
 
-let openAI_api_key, gpt_model, embed_model, gpt_system_prompt
+let openAI_api_key, gpt_model, embed_model
 
 let cancelRequested = false;
 let isOrganizing = false;
@@ -254,7 +250,6 @@ async function organizeBookmarks(organizedFolder) {
   openAI_api_key = settings.openAI_api_key;
   gpt_model = settings.gpt_model;
   embed_model = settings.embed_model;
-  gpt_system_prompt = settings.gpt_system_prompt;
 
   const unreachableBookmarks = [];
 
@@ -262,7 +257,7 @@ async function organizeBookmarks(organizedFolder) {
 
   let bookmarks = await io.getAllBookmarks();
 
-  //bookmarks = bookmarks.slice(0, 10);
+  bookmarks = bookmarks.slice(0, 10);
 
   console.log(`[organizeBookmarks] Total bookmarks found: ${bookmarks.length}`);
 
@@ -274,18 +269,18 @@ async function organizeBookmarks(organizedFolder) {
     console.log(`[organizeBookmarks] Processing: ${bm.url}`);
 
     try {
-      const result = await getSummaryAndTitle(bm.url, bm.title);
+      const summary = await getSummary(bm.url, bm.title);
       if (!result) {
         console.log(`[organizeBookmarks] Unreachable: ${bm.url}`);
         unreachableBookmarks.push(bm);
         continue;
       }
 
-      const { summary, title } = result;
+      const title = bm.title;
       console.log(`[organizeBookmarks] Summary: ${summary}`);
       console.log(`[organizeBookmarks] Title: ${title}`);
 
-      const embedding = await getEmbedding(summary, openAI_api_key,embed_model);
+      const embedding = await getEmbedding(summary);
       if (!embedding) {
         console.warn(`[organizeBookmarks] Embedding failed for: ${bm.url}`);
         continue;
@@ -381,17 +376,6 @@ organizeBtn.addEventListener("click", async () => {
   }
 });
 
-document.addEventListener("DOMContentLoaded", async () => {
-  await loadOptions();
-  systemPromptInput.style.height = calcHeight(systemPromptInput.value) + "px";
-
-  [apiKeyInput, gptModelInput, embedModelInput, systemPromptInput].forEach(input => {
-    input.addEventListener('input', () => {
-      saveOptions();
-    });
-  });
-
-});
 
 function showToast(message, type = 'success') {
   const toast = document.getElementById('toast');
@@ -407,20 +391,21 @@ function showToast(message, type = 'success') {
   document.addEventListener('click', hideToast);
 }
 
-function calcHeight(value) {
-  let numberOfLineBreaks = (value.match(/\n/g) || []).length;
-  // min-height + lines x line-height + padding + border
-  let newHeight = 20 + numberOfLineBreaks * 20 + 12 + 2;
-  return newHeight;
-}
 
-systemPromptInput.addEventListener("input", function() {
-  systemPromptInput.style.height = calcHeight(systemPromptInput.value) + "px";
-});
 
 window.addEventListener('beforeunload', (event) => {
   if (isOrganizing) {
       event.preventDefault(); // Prevent the page from being unloaded
     }
 
+});
+
+toggle.addEventListener('change', () => {
+  if (toggle.checked) {
+    advancedDiv.style.maxHeight = "500px"; // Adjust if you have more content
+    advancedDiv.style.opacity = "1";
+  } else {
+    advancedDiv.style.maxHeight = "0";
+    advancedDiv.style.opacity = "0";
+  }
 });
