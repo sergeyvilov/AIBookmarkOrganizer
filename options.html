@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <link rel="icon" href="icons/icon16.png" type="image/png">
+  <title>Bookmark Organizer Options</title>
+  <style>
+  body {
+    font-family: Verdana, sans-serif;
+    margin: 2rem;
+  }
+  h1 {
+    font-family: 'Open Sans', sans-serif;
+    text-align: center;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid lightgray;
+  }
+  label {
+    display: block;
+    margin-top: 1rem;
+  }
+  input[type="text"], input[type="password"], textarea {
+    width: 100%;
+    padding: 0.5rem;
+    box-sizing: border-box;
+    margin-top: 0.5rem;
+  }
+  #organize-btn {
+    margin-top: 1rem;
+    background-color: white;
+    border: 2px solid #04AA6D; /* Green */
+    padding: 1rem 2rem;
+    text-align: center;
+    transition-duration: 0.4s;
+    cursor: pointer;
+    border-radius: 1rem;
+    font-size: 1rem;
+  }
+  #organize-btn:hover {
+    background-color: #04AA6D; /* Green */
+    color: white;
+  }
+  #organize-btn:disabled {
+    opacity: 0.6;
+    border: 2px solid gray;
+    pointer-events:none;
+  }
+  #progress {
+    width: 100%;
+    height: 1.5rem;
+    background: #e0e0e0;
+    border-radius: 1rem;
+    overflow: hidden;
+  }
+  #progress-bar {
+    height: 100%;
+    width: 0%;
+    background: #4caf50;
+    transition: width 0.3s;
+  }
+  #progress-container {
+    margin-top: 2rem;
+    width: 100%;
+  }
+  #progress-row{
+    display: none;
+    justify-content: space-between;
+    margin-top: 1rem;
+  }
+  #progress-info{
+    float:left
+  }
+  #warning{
+    color:  #db4316;
+  }
+  #progress-text{
+    float:right
+  }
+  #button-container {
+    text-align: center;
+  }
+  #toast {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: white;
+    padding: 1rem 2rem;
+    border-radius: 0.5rem;
+    z-index: 9999;
+    text-align: center;
+    min-width: 200px;
+  }
+  .folder-names {
+    font-family:Roboto Mono,Fira Code,Source Code Pro,Menlo,Consolas,Courier New;
+  }
+  #contact {
+    float:right
+  }
+  </style>
+</head>
+<body>
+
+  <h1>AI Bookmark Organizer</h1>
+
+  <div id="plugin-description">
+  This plugin uses AI to organize your Firefox bookmarks. The bookmarks are automatically assigned to clusters based on their content.
+  <ul style="line-height: 1.8;">
+    <li> You need an <a href="https://platform.openai.com/">
+      OpenAI API key </a> to run the plugin. </li>
+    <li> Only the bookmarks from the <span class='folder-names'> Other bookmarks </span> folder in the <span class='folder-names'> Bookmarks </span> menu are organized. </li>
+    <li> Cluster folders are created inside the <span class='folder-names'> Organized Bookmarks </span> folder.</li>
+    <li> Unreachable pages can be found under <span class='folder-names'> Organized Bookmarks/Unreachable</span>. </li>
+    <li> A bookmark may be renamed if its current name doesn't reflect the content (see <span class='folder-names'> GPT Prompt </span> below).</li>
+
+  </ul>
+  </div>
+  <label for="api-key">Your OpenAI API Key</label>
+  <input type="password" id="api-key">
+
+  <label for="gpt-model">Summarization Model</label>
+  <input type="text" id="gpt-model" placeholder="e.g., gpt-4o-mini">
+
+  <label for="embed-model">Embedding Model</label>
+  <input type="text" id="embed-model" placeholder="e.g., text-embedding-3-large">
+
+  <label for="system-prompt">GPT Prompt</label>
+  <textarea id="system-prompt" placeholder="You are a helpful assistant..."></textarea>
+
+  <div id="progress-container">
+    <div id="progress">
+      <div id="progress-bar"></div>
+    </div>
+    <div id="progress-row">
+      <div id="progress-warning">Organizing bookmarks.
+        <span id="warning">Closing this window will interrupt the process.</span>
+      </div>
+      <div id="progress-text">0/-</div>
+    </div>
+    <div id="button-container">
+      <button class='button' id="organize-btn">Organize Bookmarks</button>
+    </div>
+  </div>
+  <div id="toast"> Organization complete! </div>
+  <div id="contact"> <a href="mailto:vilovskimail@gmail.com">contact</a> </div>
+  <script type="module" src="dist/options.js"></script>
+</body>
+</html>
