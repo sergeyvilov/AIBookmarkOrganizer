@@ -262,7 +262,7 @@ async function organizeBookmarks(organizedFolder) {
 
   let bookmarks = await io.getAllBookmarks();
 
-  bookmarks = bookmarks.slice(0, 10);
+  //bookmarks = bookmarks.slice(0, 10);
 
   console.log(`[organizeBookmarks] Total bookmarks found: ${bookmarks.length}`);
 
@@ -308,7 +308,7 @@ async function organizeBookmarks(organizedFolder) {
 
   //const processed = await io.loadProcessedFromFile('processed_bookmarks.json');
 
-  io.saveProcessedToFile(processed)
+  io.saveProcessedInChunks(processed)
 
   console.log(`[organizeBookmarks] Finished processing. Total summarized: ${processed.length}`);
 
