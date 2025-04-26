@@ -41,8 +41,27 @@ async function saveOptions() {
 }
 
 // Update progress UI
+let startTime = null; // Save when the processing started
+
+function formatTime(ms) {
+  const totalSeconds = Math.round(ms / 1000);
+  const hours = Math.floor(totalSeconds / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  const seconds = totalSeconds % 60;
+
+  if (hours > 0) {
+    return `${hours}h ${minutes}m`;
+  } else if (minutes > 0) {
+    return `${minutes}m ${seconds}s`;
+  } else {
+    return `${seconds}s`;
+  }
+}
+
 function updateProgress(processed, total) {
-  console.log(processed, total);
+  if (processed === 0) {
+    startTime = Date.now(); // Initialize start time
+  }
 
   if (total === -1) {
     progressBar.style.width = `0%`;
@@ -50,9 +69,20 @@ function updateProgress(processed, total) {
   } else {
     const percent = total > 0 ? (processed / total) * 100 : 0;
     progressBar.style.width = `${percent}%`;
-    progressText.textContent = `${processed}/${total}`;
-  }
 
+    let remainingText = "";
+
+    if (startTime && processed > 0) {
+      const elapsedMs = Date.now() - startTime;
+      const averagePerItemMs = elapsedMs / processed;
+      const remainingItems = total - processed;
+      const estimatedRemainingMs = remainingItems * averagePerItemMs;
+
+      remainingText = ` (~${formatTime(estimatedRemainingMs)} left)`;
+    }
+
+    progressText.textContent = `${processed}/${total}${remainingText}`;
+  }
 }
 
 // Helper: Get summary and title from OpenAI
