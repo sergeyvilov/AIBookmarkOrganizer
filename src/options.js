@@ -11,7 +11,9 @@ const progressRow = document.getElementById("progress-row");
 const progressAction = document.getElementById("progress-action");
 const toggle = document.getElementById('toggle-advanced');
 const advancedDiv = document.getElementById('advanced-settings');
-
+const openAIErrors = document.getElementById('openai-errors');
+const toastMsg = document.getElementById('toast-msg');
+const toast = document.getElementById('toast');
 
 function getSettings() {
   return new Promise((resolve) => {
@@ -265,8 +267,8 @@ async function organizeBookmarks(organizedFolder) {
 
   //bookmarks = bookmarks.slice(0, 10);
 
-  // console.log(`[organizeBookmarks] Total bookmarks found: ${bookmarks.length}`);
-  //
+  console.log(`[organizeBookmarks] Total bookmarks found: ${bookmarks.length}`);
+  // 
   // const processed = [];
   //
   // updateProgress(0,bookmarks.length)
@@ -304,9 +306,7 @@ async function organizeBookmarks(organizedFolder) {
   //   updateProgress(bm_idx+1, bookmarks.length)
   //
   // }
-  //
-  // //const processed = await io.loadProcessedFromFile('processed_bookmarks.json');
-  //
+
   // io.saveProcessedInChunks(processed)
 
   const processed = await io.loadAllProcessedFromFolder();
@@ -375,8 +375,15 @@ organizeBtn.addEventListener("click", async () => {
           chrome.runtime.openOptionsPage();
         }
       } catch (err) {
-        console.error("Organizing failed:", err);
-        showToast(err.toString() + '. Please check the OpenAI API key and the model names.','error');
+        const msg = err.message;
+        console.error('Error:' + msg);
+        const pattern = /Error: (4|5)[0-9]{2}\b/;
+        if (pattern.test(msg)) {
+          openAIErrors.style.display = 'block';
+          showToast(msg, 'error');
+        } else {
+          showToast('Error:' + msg,'error');
+        }
       } finally {
         cancelRequested = false;
         isOrganizing = false;
@@ -401,16 +408,19 @@ document.addEventListener("DOMContentLoaded", async () => {
 });
 
 function showToast(message, type = 'success') {
-  const toast = document.getElementById('toast');
-  toast.textContent = message;
+
+  toastMsg.textContent = message;
   toast.style.backgroundColor = type === 'error' ? 'rgba(255, 0, 0, 0.8)' : 'rgba(0, 128, 0, 0.8)';
   toast.style.display = 'block';
 
-  const hideToast = () => {
-    toast.style.display = 'none';
-    document.removeEventListener('click', hideToast);
+  const hideToast = (event) => {
+    // Only hide if the click is outside the toast
+    if (!toast.contains(event.target)) {
+      toast.style.display = 'none';
+      openAIErrors.style.display = 'none';
+      document.removeEventListener('click', hideToast);
+    }
   };
-
   document.addEventListener('click', hideToast);
 }
 
