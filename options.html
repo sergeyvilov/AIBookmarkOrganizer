@@ -140,6 +140,14 @@
     width:100%;
   }
 
+  #openai-errors {
+    display: none;
+  }
+
+  #toast-msg {
+    text-align: center;
+  }
+
   </style>
 
 </head>
@@ -156,7 +164,7 @@
 
     <h2>✨ How to Get Started</h2>
     <ol>
-      <li>🔑 Enter your <a href='https://openai.com/index/openai-api/'> <strong> OpenAI API key </strong> </a></li>
+      <li>🔑 Enter your <a href='https://openai.com/index/openai-api/' target="_blank"> <strong> OpenAI API key </strong> </a></li>
       <li>📚 Click <strong>"Organize Bookmarks"</strong> — and let the AI do the magic!</li>
     </ol>
 
@@ -210,7 +218,13 @@
     </div>
   </div>
 
-  <div id="toast"> Organization complete! </div>
+  <div id="toast">
+    <div id='toast-msg'>
+    </div>
+    <div id='openai-errors'>
+      Please check the <a href="https://platform.openai.com/docs/guides/error-codes" target="_blank"> OpenAI error codes.</a>
+    </div>
+  </div>
 
   <script type="module" src="dist/options.js"></script>
 

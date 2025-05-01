@@ -7,13 +7,13 @@ module.exports = {
   },
   output: {
     path: path.resolve(__dirname, 'dist'),
-    filename: '[name].js', // produces background.js and options.js
+    filename: '[name].js', 
     clean: true,
   },
   resolve: {
     extensions: ['.js'],
   },
   mode: 'production',
-  devtool: 'source-map',  // <- this avoids 'eval' in dev builds
+  devtool: 'source-map',
 
 };

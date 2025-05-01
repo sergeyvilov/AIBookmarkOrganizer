@@ -1,21 +1,2 @@
-/******/ (() => { // webpackBootstrap
-/*!***************************!*\
-  !*** ./src/background.js ***!
-  \***************************/
-chrome.action.onClicked.addListener(() => {
-  chrome.runtime.openOptionsPage();
-});
-
-chrome.runtime.onInstalled.addListener(async () => {
-  chrome.storage.local.set({
-    openAI_api_key: "",
-    gpt_model: "gpt-4o-mini",
-    embed_model: "text-embedding-3-large"
-  }, () => {
-    console.log("Default options saved.");
-  });
-});
-
-/******/ })()
-;
+chrome.action.onClicked.addListener((()=>{chrome.runtime.openOptionsPage()})),chrome.runtime.onInstalled.addListener((async()=>{chrome.storage.local.set({openAI_api_key:"",gpt_model:"gpt-4o-mini",embed_model:"text-embedding-3-large"},(()=>{console.log("Default options saved.")}))}));
 //# sourceMappingURL=background.js.map

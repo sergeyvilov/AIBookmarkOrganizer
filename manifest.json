@@ -5,7 +5,7 @@
   "description": "Organize your chaotic bookmarks with the power of AI.",
   "permissions": [
     "bookmarks",
-    "storage",
+    "storage"
   ],
   "host_permissions": [
     "<all_urls>",
@@ -13,6 +13,7 @@
   ],
   "web_accessible_resources": [
     {
+      "resources": [],
       "matches": ["<all_urls>"]
     }
   ],
