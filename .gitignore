@@ -3,5 +3,5 @@ bookmarks-*
 node_modules/
 .*
 !/.gitignore
-
+processed_bookmarks/
 

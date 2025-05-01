@@ -8,6 +8,7 @@ const organizeBtn = document.getElementById("organize-btn");
 const progressBar = document.getElementById("progress-bar");
 const progressText = document.getElementById("progress-text");
 const progressRow = document.getElementById("progress-row");
+const progressAction = document.getElementById("progress-action");
 const toggle = document.getElementById('toggle-advanced');
 const advancedDiv = document.getElementById('advanced-settings');
 
@@ -58,7 +59,7 @@ function formatTime(ms) {
   }
 }
 
-function updateProgress(processed, total) {
+function updateProgress(processed, total, pct = false) {
   if (processed === 0) {
     startTime = Date.now(); // Initialize start time
   }
@@ -81,7 +82,12 @@ function updateProgress(processed, total) {
       remainingText = ` (~${formatTime(estimatedRemainingMs)} left)`;
     }
 
-    progressText.textContent = `${processed}/${total}${remainingText}`;
+    if (pct) {
+      progressText.textContent = `${Math.round(percent)}%${remainingText}`;
+    } else {
+      progressText.textContent = `${processed}/${total}${remainingText}`;
+    }
+
   }
 }
 
@@ -259,71 +265,77 @@ async function organizeBookmarks(organizedFolder) {
 
   //bookmarks = bookmarks.slice(0, 10);
 
-  console.log(`[organizeBookmarks] Total bookmarks found: ${bookmarks.length}`);
+  // console.log(`[organizeBookmarks] Total bookmarks found: ${bookmarks.length}`);
+  //
+  // const processed = [];
+  //
+  // updateProgress(0,bookmarks.length)
+  //
+  // for (const [bm_idx, bm] of bookmarks.entries()) {
+  //   console.log(`[organizeBookmarks] Processing: ${bm.url}`);
+  //
+  //   try {
+  //     const summary = await getSummary(bm.url, bm.title);
+  //     if (!summary) {
+  //       console.log(`[organizeBookmarks] Unreachable: ${bm.url}`);
+  //       unreachableBookmarks.push(bm);
+  //       continue;
+  //     }
+  //
+  //     const title = bm.title;
+  //
+  //     const embedding = await getEmbedding(summary);
+  //     if (!embedding) {
+  //       console.warn(`[organizeBookmarks] Embedding failed for: ${bm.url}`);
+  //       continue;
+  //     }
+  //
+  //     processed.push({ url: bm.url, title, summary, embedding });
+  //   } catch (err) {
+  //     console.error(`[organizeBookmarks] Error processing ${bm.url}:`, err);
+  //     throw new Error(err)
+  //   }
+  //
+  //   if (cancelRequested) {
+  //     console.log("[organizeBookmarks] Cancel requested. Stopping.");
+  //     return;
+  //   }
+  //
+  //   updateProgress(bm_idx+1, bookmarks.length)
+  //
+  // }
+  //
+  // //const processed = await io.loadProcessedFromFile('processed_bookmarks.json');
+  //
+  // io.saveProcessedInChunks(processed)
 
-  const processed = [];
-
-  updateProgress(0,bookmarks.length)
-
-  for (const [bm_idx, bm] of bookmarks.entries()) {
-    console.log(`[organizeBookmarks] Processing: ${bm.url}`);
-
-    try {
-      const summary = await getSummary(bm.url, bm.title);
-      if (!summary) {
-        console.log(`[organizeBookmarks] Unreachable: ${bm.url}`);
-        unreachableBookmarks.push(bm);
-        continue;
-      }
-
-      const title = bm.title;
-      console.log(`[organizeBookmarks] Summary: ${summary}`);
-      console.log(`[organizeBookmarks] Title: ${title}`);
-
-      const embedding = await getEmbedding(summary);
-      if (!embedding) {
-        console.warn(`[organizeBookmarks] Embedding failed for: ${bm.url}`);
-        continue;
-      }
-
-      processed.push({ url: bm.url, title, summary, embedding });
-    } catch (err) {
-      console.error(`[organizeBookmarks] Error processing ${bm.url}:`, err);
-      throw new Error(err)
-    }
-
-    if (cancelRequested) {
-      console.log("[organizeBookmarks] Cancel requested. Stopping.");
-      return;
-    }
-
-    updateProgress(bm_idx+1, bookmarks.length)
-
-  }
-
-  //const processed = await io.loadProcessedFromFile('processed_bookmarks.json');
-
-  io.saveProcessedInChunks(processed)
+  const processed = await io.loadAllProcessedFromFolder();
 
   console.log(`[organizeBookmarks] Finished processing. Total summarized: ${processed.length}`);
 
-  // Create nested folders
-  //const dendrogram = buildDendrogram(processed);
+  progressAction.textContent = 'Generating clusters... (2/3)'
 
-  //for (let t = 0.10; t <= 0.95; t += 0.01) {
-  //  const clusters = cutDendrogram(dendrogram, t);
-  //  console.log(`Threshold: ${t.toFixed(2)} → Clusters: ${clusters.length}`);
-  //}
+  //const clusters = await cluster.generateHierarchicalClusters(processed);
 
-  //const { threshold, bestClusters } = findOptimalThreshold(dendrogram);
+  const clusters = await cluster.generateHierarchicalClusters(processed, (current, total) => {
+    updateProgress(current, total, true);
+    return cancelRequested;
+    });
 
-  //console.log(`Optimal threshold: ${threshold.toFixed(2)} | silhouetteScore: ${silhouetteScore(bestClusters).toFixed(3)}`);
+  if (clusters === -1) {
+    console.warn(`[organizeBookmarks] clustering cancelled`);
+    return;
+  }
 
-  //const clusters = cutDendrogram(dendrogram, threshold); // threshold to cut tree
-
-  const clusters = await cluster.generateDBSCANClusters(processed);
+  //const clusters = await cluster.generateDBSCANClusters(processed);
 
   console.log(`[organizeBookmarks] Clusters formed: ${clusters.length}`);
+
+  console.log(clusters)
+
+  organizeBtn.disabled = true;
+
+  progressAction.textContent = 'Creating folders... (3/3)'
 
   await createOrganizedFolders(clusters,organizedFolder);
 
@@ -354,7 +366,8 @@ organizeBtn.addEventListener("click", async () => {
       try {
         isOrganizing = true;
         organizeBtn.textContent = "Cancel";
-        progressRow.style.display = 'flex';
+        progressAction.textContent = 'Getting page embeddings... (1/3)'
+        progressRow.style.display = 'block';
         await organizeBookmarks(organizedFolder);
         if (!cancelRequested) {
           console.log("Organizing done.");

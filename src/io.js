@@ -76,7 +76,7 @@ export async function saveProcessedInChunks(processed) {
 
     a.style.display = "none";
     a.href = url;
-    a.download = `processed_bookmarks_part${i + 1}.json`;
+    a.download = `processed_bookmarks/processed_bookmarks_part${i + 1}.json`;
 
     document.body.appendChild(a);
 
@@ -92,9 +92,53 @@ export async function saveProcessedInChunks(processed) {
   }
 }
 
-export async function loadProcessedFromFile(filePath) {
-  const response = await fetch(filePath);
-  if (!response.ok) throw new Error(`Failed to load ${filePath}: ${response.statusText}`);
-  const json = await response.json();
-  return json;
+export async function loadAllProcessedFromFolder() {
+  try {
+    const merged = [];
+    const filePromises = [];
+
+    // 🚨 Fallback: <input type="file" webkitdirectory>
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.webkitdirectory = true;
+    input.multiple = true;
+    input.style.display = 'none';
+
+    const fileSelection = new Promise((resolve) => {
+      input.onchange = () => resolve(Array.from(input.files));
+      document.body.appendChild(input);
+      input.click();
+    });
+
+    const files = await fileSelection;
+    document.body.removeChild(input);
+
+    files
+    .filter(file => file.name.endsWith('.json'))
+    .forEach(file => {
+      const filePromise = file.text().then(text => {
+        try {
+          const json = JSON.parse(text);
+          if (Array.isArray(json)) return json;
+          console.warn(`${file.name} did not contain a JSON array`);
+          return [];
+        } catch (err) {
+          console.error(`Error parsing ${file.name}:`, err);
+          return [];
+        }
+      });
+      filePromises.push(filePromise);
+    });
+
+
+    const results = await Promise.all(filePromises);
+    results.forEach(arr => merged.push(...arr));
+
+    console.log(`Loaded ${merged.length} items from ${results.length} files.`);
+    return merged;
+
+  } catch (err) {
+    console.error("Failed to load files:", err);
+    throw err;
+  }
 }

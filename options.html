@@ -84,17 +84,20 @@
   }
   #progress-row{
     display: none;
-    justify-content: space-between;
     margin-top: 1rem;
-  }
-  #progress-info{
-    float:left
+    position: relative;
+    width: 100%;
+    text-align: center;
   }
   #warning{
     color:  #db4316;
+    margin-top: 1rem;
+    width: 100%;
   }
   #progress-text{
-    float:right
+    position: absolute;
+    right: 0%;
+    top: 0%;
   }
   #button-container {
     text-align: center;
@@ -131,6 +134,9 @@
   }
   .form-check {
       margin-top: 1rem;
+  }
+  #progress-action {
+    width:100%;
   }
 
   </style>
@@ -187,10 +193,9 @@
       <div id="progress-bar"></div>
     </div>
     <div id="progress-row">
-      <div id="progress-warning">Organizing bookmarks.
-        <span id="warning">You can switch to another tab, but closing this window will interrupt the process.</span>
-      </div>
-      <div id="progress-text">0/-</div>
+        <div id="progress-action"> Organizing bookmarks...</div>
+        <div id="warning"> You can switch to another tab, but closing this window will interrupt the process. </div>
+        <div id="progress-text">0/-</div>
     </div>
     <div id="button-container">
       <button class='button' id="organize-btn">Organize Bookmarks</button>
