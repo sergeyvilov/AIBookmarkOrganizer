@@ -19,10 +19,8 @@
 
 2. 🧐 For each summary **embeddings** are generated using an OpenAI embeddings model (e.g., `text-embedding-3-large`).
 
-3. 🔍 **DBSCAN clustering** (with `minPoints = 4`) is applied to the embeddings to group similar bookmarks.
+3. 🔍 **Hierarchical clustering** is applied to the embeddings to group similar bookmarks.
 
-4. 📈 The **optimal number of clusters** is determined by maximizing the **Silhouette score** over a range of DBSCAN `epsilon` values.
+4. 📈 The **optimal number of clusters** is determined using the elbow method.
 
-5. 🏷️ For each cluster a **cluster name** is generated using a GPT model, based on the combined summaries of the pages in that cluster.
-
-6. 🚀 Pages classified as **noise** by DBSCAN are treated as **isolated clusters**.
+5. 🏷️ For each cluster with two or more pages a **cluster name** is generated using a GPT model, based on the combined summaries of the pages in that cluster.
