@@ -8,25 +8,25 @@ export async function getOrganizedFolder() {
   const barChildren = await chrome.bookmarks.getChildren(bar.id);
   const existing = barChildren.find(child => child.title === "Organized Bookmarks");
 
-  console.log("existing", existing);
+  //console.log("existing", existing);
 
   let OrganizedFolder;
 
   if (existing) {
 
-    console.log("waiting for confirmation");
+    //console.log("waiting for confirmation");
     const userConfirmed = confirm('"Organized Bookmarks" folder already exists. Do you want to delete it and create a new one?');
     if (userConfirmed) {
       await chrome.bookmarks.removeTree(existing.id);
       OrganizedFolder = await chrome.bookmarks.create({ parentId: bar.id, title: "Organized Bookmarks" });
-      console.log("Created new 'Organized Bookmarks' folder.");
+      //console.log("Created new 'Organized Bookmarks' folder.");
     } else {
       OrganizedFolder = existing;
-      console.log("'Organized Bookmarks' folder remains unchanged.");
+      //console.log("'Organized Bookmarks' folder remains unchanged.");
     }
   } else {
     OrganizedFolder = await chrome.bookmarks.create({ parentId: bar.id, title: "Organized Bookmarks" });
-    console.log("Created new 'Organized Bookmarks' folder.");
+    //console.log("Created new 'Organized Bookmarks' folder.");
   }
 
   return OrganizedFolder
@@ -58,7 +58,7 @@ export async function getAllBookmarks() {
   }
 
   traverse(otherBookmarksNode.children);
-  console.log("Filtered bookmarks from 'Other Bookmarks':", bookmarks.length);
+  //console.log("Filtered bookmarks from 'Other Bookmarks':", bookmarks.length);
   return bookmarks;
 }
 
@@ -134,7 +134,7 @@ export async function loadAllProcessedFromFolder() {
     const results = await Promise.all(filePromises);
     results.forEach(arr => merged.push(...arr));
 
-    console.log(`Loaded ${merged.length} items from ${results.length} files.`);
+    //console.log(`Loaded ${merged.length} items from ${results.length} files.`);
     return merged;
 
   } catch (err) {

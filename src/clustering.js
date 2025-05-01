@@ -4,7 +4,7 @@ export async function generateHierarchicalClusters(processed, onProgress = null)
 
   // for (let t = 0.10; t <= 0.95; t += 0.01) {
   //   const clusters = cutDendrogram(dendrogram, t);
-  //   console.log(`Threshold: ${t.toFixed(2)} → Clusters: ${clusters.length}`);
+  //   //console.log(`Threshold: ${t.toFixed(2)} → Clusters: ${clusters.length}`);
   // }
 
   if (dendrogram === -1) {
@@ -111,7 +111,7 @@ async function buildDendrogram(items,onProgress = null) {
       items: [...clusterA.items, ...clusterB.items]
     };
 
-    console.log(`Merging clusters ${clusterA.id} & ${clusterB.id} | Max similarity: ${maxSim.toFixed(4)}`);
+    //console.log(`Merging clusters ${clusterA.id} & ${clusterB.id} | Max similarity: ${maxSim.toFixed(4)}`);
 
     // Safely remove clusters in reverse order to prevent index shift
     const [first, second] = [i, j].sort((a, b) => b - a);
@@ -124,7 +124,7 @@ async function buildDendrogram(items,onProgress = null) {
     if (onProgress) {
       const cancelRequested = onProgress(processed, totalMerges);
       if (cancelRequested) {
-          console.log("[clustering] Cancel requested. Stopping.");
+          //console.log("[clustering] Cancel requested. Stopping.");
           return -1;
       }
     }
@@ -241,7 +241,7 @@ function findOptimalThreshold(dendrogram, {
   threshold = thresholds[idx];
   bestClusters = cutDendrogram(dendrogram, threshold);
 
-  console.log(`Optimal threshold after ${r} refinements: ${threshold.toFixed(2)}`);
+  //console.log(`Optimal threshold after ${r} refinements: ${threshold.toFixed(2)}`);
 
   const delta = (thresholds[1] - thresholds[0]) * (refinementSteps / 2) * zoomFraction;
   low = Math.max(low, threshold - delta);
@@ -280,7 +280,7 @@ return { threshold, bestClusters };
 //   const embeddings = processedData.map(item => item.embedding);
 //   const n = processedData.length;
 //
-//   console.log(`Embeddings dimensions: ${embeddings[0].length} (assuming all embeddings have the same dimension)`);
+//   //console.log(`Embeddings dimensions: ${embeddings[0].length} (assuming all embeddings have the same dimension)`);
 //
 //   // 1. PCA
 //   const pca = new PCA(embeddings);
@@ -296,8 +296,8 @@ return { threshold, bestClusters };
 //   const componentsToKeep = Math.min(p1, p2 + 1);
 //   const reduced = pca.predict(embeddings, { nComponents: componentsToKeep }).to2DArray();
 //
-//   console.log(`p1 (min processedData length / 5): ${p1}`);
-//   console.log(`p2 (min number of components for PCA): ${p2}`);
+//   //console.log(`p1 (min processedData length / 5): ${p1}`);
+//   //console.log(`p2 (min number of components for PCA): ${p2}`);
 //
 //   // 2. Silhouette-based epsilon search
 //   let bestEps = 0.02;
@@ -310,7 +310,7 @@ return { threshold, bestClusters };
 //     const flatLabels = assignUniqueLabelsToNoise(clusters, reduced.length);
 //     const score = silhouetteScore(reduced, flatLabels);
 //
-//     console.log(`Silhouette score for epsilon ${eps.toFixed(3)}: ${score.toFixed(3)}`);
+//     //console.log(`Silhouette score for epsilon ${eps.toFixed(3)}: ${score.toFixed(3)}`);
 //
 //     if (score > bestScore) {
 //       bestScore = score;

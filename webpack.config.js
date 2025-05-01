@@ -13,7 +13,7 @@ module.exports = {
   resolve: {
     extensions: ['.js'],
   },
-  mode: 'development',
+  mode: 'production',
   devtool: 'source-map',  // <- this avoids 'eval' in dev builds
 
 };

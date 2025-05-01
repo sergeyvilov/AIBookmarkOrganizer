@@ -106,7 +106,7 @@ async function getSummary(url, fallbackSummary) {
   const extension = hasExtension ? segments.pop().toLowerCase() : null;
 
   if (hasExtension && extension !== 'html') {
-    console.log(`[getSummaryAndTitle] URL ${url} has extension .${extension}, skipping fetch and using fallback.`);
+    //console.log(`[getSummaryAndTitle] URL ${url} has extension .${extension}, skipping fetch and using fallback.`);
     return fallbackSummary;
   }
 
@@ -137,7 +137,7 @@ async function getSummary(url, fallbackSummary) {
   }
   const result = await response.json();
   const summary = result.choices?.[0]?.message?.content.trim() || "";
-  console.log("GPT output:", summary);
+  //console.log("GPT output:", summary);
   if (summary === 'error') {
     return fallbackSummary
   }
@@ -223,7 +223,7 @@ async function createOrganizedFolders(clusters,organizedFolder) {
 async function addUnreachableBookmarks(bookmarks,organizedFolder) {
   if (bookmarks.length === 0) return;
 
-  console.log("[addUnreachableBookmarks] 'Organized Bookmarks' folder:", organizedFolder);
+  //console.log("[addUnreachableBookmarks] 'Organized Bookmarks' folder:", organizedFolder);
 
   // Create the "Unreachable" subfolder under "Organized Bookmarks"
   const organizedFolderChildren = await chrome.bookmarks.getChildren(organizedFolder.id);
@@ -233,14 +233,14 @@ async function addUnreachableBookmarks(bookmarks,organizedFolder) {
   ? unreachableFolderExisting
   : (await chrome.bookmarks.create({ parentId: organizedFolder.id, title: "Unreachable" }));
 
-  console.log("[addUnreachableBookmarks] Created 'Unreachable' folder:", unreachableFolder);
+  //console.log("[addUnreachableBookmarks] Created 'Unreachable' folder:", unreachableFolder);
 
   // Add all unreachable bookmarks to this folder
   for (const bm of bookmarks) {
     await chrome.bookmarks.create({ parentId: unreachableFolder.id, title: bm.title, url: bm.url });
   }
 
-  console.log(`[addUnreachableBookmarks] Added ${bookmarks.length} unreachable bookmarks.`);
+  //console.log(`[addUnreachableBookmarks] Added ${bookmarks.length} unreachable bookmarks.`);
 }
 
 let openAI_api_key, gpt_model, embed_model
@@ -259,25 +259,25 @@ async function organizeBookmarks(organizedFolder) {
 
   const unreachableBookmarks = [];
 
-  console.log("[organizeBookmarks] Starting bookmark organization...");
+  //console.log("[organizeBookmarks] Starting bookmark organization...");
 
   let bookmarks = await io.getAllBookmarks();
 
   //bookmarks = bookmarks.slice(0, 10);
 
-  // console.log(`[organizeBookmarks] Total bookmarks found: ${bookmarks.length}`);
+  // //console.log(`[organizeBookmarks] Total bookmarks found: ${bookmarks.length}`);
   //
   // const processed = [];
   //
   // updateProgress(0,bookmarks.length)
   //
   // for (const [bm_idx, bm] of bookmarks.entries()) {
-  //   console.log(`[organizeBookmarks] Processing: ${bm.url}`);
+  //   //console.log(`[organizeBookmarks] Processing: ${bm.url}`);
   //
   //   try {
   //     const summary = await getSummary(bm.url, bm.title);
   //     if (!summary) {
-  //       console.log(`[organizeBookmarks] Unreachable: ${bm.url}`);
+  //       //console.log(`[organizeBookmarks] Unreachable: ${bm.url}`);
   //       unreachableBookmarks.push(bm);
   //       continue;
   //     }
@@ -297,7 +297,7 @@ async function organizeBookmarks(organizedFolder) {
   //   }
   //
   //   if (cancelRequested) {
-  //     console.log("[organizeBookmarks] Cancel requested. Stopping.");
+  //     //console.log("[organizeBookmarks] Cancel requested. Stopping.");
   //     return;
   //   }
   //
@@ -311,7 +311,7 @@ async function organizeBookmarks(organizedFolder) {
 
   const processed = await io.loadAllProcessedFromFolder();
 
-  console.log(`[organizeBookmarks] Finished processing. Total summarized: ${processed.length}`);
+  //console.log(`[organizeBookmarks] Finished processing. Total summarized: ${processed.length}`);
 
   progressAction.textContent = 'Generating clusters... (2/3)'
 
@@ -329,9 +329,9 @@ async function organizeBookmarks(organizedFolder) {
 
   //const clusters = await cluster.generateDBSCANClusters(processed);
 
-  console.log(`[organizeBookmarks] Clusters formed: ${clusters.length}`);
+  //console.log(`[organizeBookmarks] Clusters formed: ${clusters.length}`);
 
-  console.log(clusters)
+  //console.log(clusters)
 
   organizeBtn.disabled = true;
 
@@ -341,7 +341,7 @@ async function organizeBookmarks(organizedFolder) {
 
   await addUnreachableBookmarks(unreachableBookmarks,organizedFolder);
 
-  console.log("[organizeBookmarks] Bookmark organization complete.");
+  //console.log("[organizeBookmarks] Bookmark organization complete.");
 
 }
 
@@ -355,7 +355,7 @@ organizeBtn.addEventListener("click", async () => {
       organizeBtn.textContent = "Cancelling...";
     }
   } else {
-    console.log("Organize button clicked");
+    //console.log("Organize button clicked");
     const organizedFolder = await io.getOrganizedFolder()
     const bookmarks = await io.getAllBookmarks()
     const userConfirmed = confirm(`Found ${bookmarks.length} bookmarks. Start organizing?`);
@@ -370,7 +370,7 @@ organizeBtn.addEventListener("click", async () => {
         progressRow.style.display = 'block';
         await organizeBookmarks(organizedFolder);
         if (!cancelRequested) {
-          console.log("Organizing done.");
+          //console.log("Organizing done.");
           showToast(`Successfully organized ${bookmarks.length} bookmarks.`,'success');
           chrome.runtime.openOptionsPage();
         }

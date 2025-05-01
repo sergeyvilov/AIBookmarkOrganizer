@@ -6,9 +6,6 @@
   "permissions": [
     "bookmarks",
     "storage",
-    "activeTab",
-    "notifications",
-    "downloads"
   ],
   "host_permissions": [
     "<all_urls>",
@@ -16,7 +13,6 @@
   ],
   "web_accessible_resources": [
     {
-      "resources": ["processed_bookmarks.json"],
       "matches": ["<all_urls>"]
     }
   ],
