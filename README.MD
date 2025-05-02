@@ -24,3 +24,27 @@
 4. 📈 The **optimal number of clusters** is determined using the elbow method.
 
 5. 🏷️ For each cluster with two or more pages a **cluster name** is generated using a GPT model, based on the combined summaries of the pages in that cluster.
+
+---
+
+## 🛠️ Building from source
+
+requrements:
+
+```bash
+npm==11.3.0
+```
+
+1. Install Webpack and its CLI as development dependencies:
+
+   ```bash
+   npm install --save-dev webpack@5.99.6 webpack-cli
+   ```
+
+2. Run Webpack using the config file:
+
+   ```bash
+   npx webpack --config webpack.config.js
+   ```
+
+Tested at: macOS 14.1 /Apple M1/
