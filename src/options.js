@@ -12,6 +12,7 @@ const progressAction = document.getElementById("progress-action");
 const toggle = document.getElementById('toggle-advanced');
 const advancedDiv = document.getElementById('advanced-settings');
 const openAIErrors = document.getElementById('openai-errors');
+const internalErrors = document.getElementById('internal-errors');
 const toastMsg = document.getElementById('toast-msg');
 const toast = document.getElementById('toast');
 
@@ -382,6 +383,7 @@ organizeBtn.addEventListener("click", async () => {
           openAIErrors.style.display = 'block';
           showToast(msg, 'error');
         } else {
+          internalErrors.style.display = 'block';
           showToast('Error:' + msg,'error');
         }
       } finally {
@@ -418,6 +420,7 @@ function showToast(message, type = 'success') {
     if (!toast.contains(event.target)) {
       toast.style.display = 'none';
       openAIErrors.style.display = 'none';
+      internalErrors.style.display = 'none';
       document.removeEventListener('click', hideToast);
     }
   };
