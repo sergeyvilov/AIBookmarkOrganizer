@@ -314,11 +314,10 @@ async function organizeBookmarks(organizedFolder) {
 
   //console.log(`[organizeBookmarks] Finished processing. Total summarized: ${processed.length}`);
 
-  progressAction.textContent = 'Generating clusters... (2/3)'
-
   //const clusters = await cluster.generateHierarchicalClusters(processed);
 
   const clusters = await cluster.generateHierarchicalClusters(processed, (current, total) => {
+    progressAction.textContent = 'Generating clusters... (2/3)'
     updateProgress(current, total, true);
     return cancelRequested;
     });
