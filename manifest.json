@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "AI Bookmark Organizer",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Organize your chaotic bookmarks with the power of AI.",
   "permissions": [
     "bookmarks",

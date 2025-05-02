@@ -9,3 +9,11 @@ cp -r README.MD src icons manifest.json options.html build.sh webpack.config.js 
 cp -r dist icons manifest.json options.html $ext_dir
 
 rm $ext_dir/dist/*.map
+
+cd $ext_dir
+
+web-ext build
+
+cd production/
+
+zip -r source.zip source/ && rm -r source/
